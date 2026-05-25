@@ -1,4 +1,4 @@
-# @suverse/mcp-server
+# @suverselabs/mcp-server
 
 An [MCP](https://modelcontextprotocol.io) server that gives Claude Desktop (or any
 MCP client) **15 tools** for SuVerse's pay-per-call US-government and freight APIs.
@@ -44,7 +44,7 @@ them, paying transparently from your funded Base wallet.
      }
    }
    ```
-   Once published, replace `command`/`args` with `"npx"` + `["-y", "@suverse/mcp-server"]`.
+   Once published, replace `command`/`args` with `"npx"` + `["-y", "@suverselabs/mcp-server"]`.
 3. **Fund the wallet.** Send **USDC on Base** (~$5–10) to the address the server
    logs at startup (or check it any time with the `suverse_balance` tool). You do
    **not** need ETH for gas — x402 settlements on Base are gas-sponsored.
