@@ -10,6 +10,8 @@ export default defineConfig({
   target: "node20",
   outDir: "dist",
   clean: true,
-  sourcemap: true,
+  // No sourcemap in the published bundle: it would ship the full TS source (bloat,
+  // no runtime value for consumers). Local debugging uses `npm run dev` (tsx) instead.
+  sourcemap: false,
   banner: { js: "#!/usr/bin/env node" },
 });

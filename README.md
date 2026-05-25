@@ -111,6 +111,18 @@ base64 into the chat.
   `SUVERSE_ALLOW_PATHS_OUTSIDE_HOME=true`), reject sensitive locations
   (`.ssh`, `.aws`, `credentials`, key files, …), and are content-type verified.
 
+### Data sent off your machine
+
+The document-parsing tools work by **uploading the file's contents** (base64-encoded,
+or whatever you pass via `pdf_base64` / `image_base64` / `text`) to `api.suverse.io`,
+where they're parsed. So while your private key never leaves your machine, **the
+documents you ask Claude to parse do.** Only pass files you're comfortable sending to
+SuVerse for processing. The `file_path` guards above (home-directory restriction,
+sensitive-location denylist, magic-byte type check) limit *which* files can be read,
+but any file you do parse is transmitted. The free tools (`gov_list_services`,
+`suverse_estimate_cost`, `suverse_balance`) and the on-chain balance read send no
+file data.
+
 ## Configuration reference
 
 | Env var | Default | Notes |
