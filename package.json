@@ -1,0 +1,53 @@
+{
+  "name": "@suverse/mcp-server",
+  "version": "0.1.0",
+  "description": "MCP server that wraps SuVerse's pay-per-call government + freight APIs as Claude Desktop tools, paying per call in Base USDC via x402.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "suverse-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "dev": "tsx src/index.ts",
+    "prepublishOnly": "npm run typecheck && npm run test && npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "claude",
+    "x402",
+    "usdc",
+    "base",
+    "suverse",
+    "freight",
+    "government-api"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@x402/axios": "^2.13.0",
+    "@x402/core": "^2.13.0",
+    "@x402/evm": "^2.13.0",
+    "axios": "^1.13.2",
+    "viem": "^2.51.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "nock": "^14.0.0",
+    "tsup": "^8.3.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0"
+  }
+}
