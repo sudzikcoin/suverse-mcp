@@ -6,7 +6,40 @@ Calls are paid automatically, per request, in **USDC on Base** via the
 [x402](https://x402.org) protocol — you fund a wallet once and Claude pays as it
 works. Your private key never leaves your machine.
 
-> Status: **v0.1.0 — Phase 2 (core), not yet published to npm.** Build + run locally.
+> ✅ **Published on npm:** https://www.npmjs.com/package/@suverselabs/mcp-server
+
+## Quick Start
+
+Install via npx (no local build needed):
+
+```bash
+npx -y @suverselabs/mcp-server
+```
+
+### Claude Desktop Setup
+
+Add to `claude_desktop_config.json`:
+
+- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "suverse": {
+      "command": "npx",
+      "args": ["-y", "@suverselabs/mcp-server"],
+      "env": {
+        "SUVERSE_BASE_PRIVATE_KEY": "0xYOUR_PRIVATE_KEY_HERE"
+      }
+    }
+  }
+}
+```
+
+The private key controls a Base wallet that pays for tool calls in USDC. Fund it with ~$5-10 USDC on Base. You don't need ETH for gas — Base settlements are gas-sponsored. Check your balance anytime with the free `suverse_balance` tool.
+
+Restart Claude Desktop. The 15 SuVerse tools will appear in Claude's tool list.
 
 ## What is SuVerse?
 
@@ -20,34 +53,6 @@ pay per call in USDC.
 Without this server you'd hand-roll x402 payments to call SuVerse. With it, the
 endpoints appear as native Claude tools: ask in plain language and Claude calls
 them, paying transparently from your funded Base wallet.
-
-## Install
-
-1. **Build locally** (until published):
-   ```bash
-   git clone <repo> && cd suverse-mcp
-   npm install && npm run build
-   ```
-2. **Add to `claude_desktop_config.json`** (Claude Desktop → Settings → Developer):
-   ```json
-   {
-     "mcpServers": {
-       "suverse": {
-         "command": "node",
-         "args": ["/absolute/path/to/suverse-mcp/dist/index.js"],
-         "env": {
-           "SUVERSE_BASE_PRIVATE_KEY": "0x…",
-           "SUVERSE_API_BASE": "https://api.suverse.io",
-           "SUVERSE_MAX_PAYMENT_USDC": "0.60"
-         }
-       }
-     }
-   }
-   ```
-   Once published, replace `command`/`args` with `"npx"` + `["-y", "@suverselabs/mcp-server"]`.
-3. **Fund the wallet.** Send **USDC on Base** (~$5–10) to the address the server
-   logs at startup (or check it any time with the `suverse_balance` tool). You do
-   **not** need ETH for gas — x402 settlements on Base are gas-sponsored.
 
 ## Tools
 
@@ -136,12 +141,29 @@ file data.
 
 ## Development
 
+For contributors / running from source. End users should use the `npx` [Quick Start](#quick-start) above instead.
+
 ```bash
+git clone https://github.com/sudzikcoin/suverse-mcp && cd suverse-mcp
 npm install
 npm run typecheck   # tsc --noEmit
 npm test            # vitest (mocked HTTP)
 npm run build       # tsup → dist/index.js
 npm run dev         # run from source (tsx)
+```
+
+To run a local build in Claude Desktop, point `command`/`args` at the built file instead of `npx`:
+
+```json
+{
+  "mcpServers": {
+    "suverse": {
+      "command": "node",
+      "args": ["/absolute/path/to/suverse-mcp/dist/index.js"],
+      "env": { "SUVERSE_BASE_PRIVATE_KEY": "0xYOUR_PRIVATE_KEY_HERE" }
+    }
+  }
+}
 ```
 
 ## License
