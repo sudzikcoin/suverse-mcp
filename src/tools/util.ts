@@ -6,7 +6,19 @@ import { ENDPOINTS, GOV_SERVICES_PATH, microToUsd } from "../endpoints.js";
 import { log } from "../logger.js";
 import { err, ok, type ToolContext } from "./shared.js";
 
-export const FREE_TOOLS = ["gov_list_services", "suverse_estimate_cost", "suverse_balance"] as const;
+export const FREE_TOOLS = [
+  "gov_list_services",
+  "suverse_estimate_cost",
+  "suverse_balance",
+  "suverse_search_endpoints",
+] as const;
+
+/**
+ * Unified x402 search runs against the SuVerse facilitator, not the
+ * data-plane api.suverse.io. Override via `SUVERSE_SEARCH_BASE_URL` for
+ * local dev / staging — production points at the live facilitator host.
+ */
+const SEARCH_BASE = (process.env.SUVERSE_SEARCH_BASE_URL ?? "https://facilitator.suverse.io").replace(/\/+$/, "");
 
 export function registerUtilTools(server: McpServer, ctx: ToolContext): void {
   // gov_list_services — free catalog of the 128 gov_query service ids + params.
@@ -107,6 +119,66 @@ export function registerUtilTools(server: McpServer, ctx: ToolContext): void {
         return err(
           `Could not read USDC balance for ${ctx.http.address}: ${(e as Error).message}. ` +
             `Set SUVERSE_BASE_RPC_URL if the default Base RPC is rate-limited.`,
+        );
+      }
+    },
+  );
+
+  // suverse_search_endpoints — unified search across SuVerse's own paid
+  // endpoints + every x402 endpoint the platform has discovered in CDP
+  // Bazaar (~20k+ as of 2026-06-01) + future sources. FREE.
+  server.registerTool(
+    "suverse_search_endpoints",
+    {
+      description:
+        "Search every paid x402 endpoint SuVerse knows about (its own + everything " +
+        "mirrored from CDP Bazaar + future catalogs). Returns the best matches with " +
+        "URL, price, accepted networks, and quality signals. FREE — no payment.",
+      inputSchema: {
+        q: z.string().min(1).max(200).describe("Search query, lowercased substring match against description + URL."),
+        limit: z.number().int().min(1).max(100).optional().describe("Max results to return (default 20)."),
+        offset: z.number().int().min(0).optional().describe("Pagination offset (default 0)."),
+        network: z
+          .string()
+          .optional()
+          .describe("CAIP-2 network filter, e.g. 'eip155:8453' (Base), 'solana:5eykt4...' (Solana mainnet), 'cosmos:noble-1'."),
+        source: z
+          .enum(["suverse-own", "cdp-bazaar", "x402-org", "suverse-cosmos"])
+          .optional()
+          .describe("Restrict to one catalog source."),
+        sort: z
+          .enum(["relevance", "price-asc", "quality-desc"])
+          .optional()
+          .describe("Sort order. Default 'relevance' puts SuVerse's own endpoints first then ranks by traffic."),
+      },
+    },
+    async (args) => {
+      const a = args as {
+        q: string;
+        limit?: number;
+        offset?: number;
+        network?: string;
+        source?: string;
+        sort?: string;
+      };
+      const url = new URL(`${SEARCH_BASE}/v1/search`);
+      url.searchParams.set("q", a.q);
+      if (a.limit !== undefined) url.searchParams.set("limit", String(a.limit));
+      if (a.offset !== undefined) url.searchParams.set("offset", String(a.offset));
+      if (a.network !== undefined) url.searchParams.set("network", a.network);
+      if (a.source !== undefined) url.searchParams.set("source", a.source);
+      if (a.sort !== undefined) url.searchParams.set("sort", a.sort);
+      try {
+        const res = await fetch(url.toString());
+        if (!res.ok) {
+          const body = await res.text();
+          return err(`Search HTTP ${res.status}: ${body.slice(0, 200)}`);
+        }
+        return ok(await res.json());
+      } catch (e) {
+        return err(
+          `Search request failed: ${(e as Error).message}. ` +
+            `Set SUVERSE_SEARCH_BASE_URL if running against staging.`,
         );
       }
     },

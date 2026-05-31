@@ -36,17 +36,18 @@ async function connect(ctx: ToolContext): Promise<Client> {
 const text = (r: { content: { type: string; text?: string }[] }) => r.content[0]?.text ?? "";
 
 describe("tool registration", () => {
-  it("registers all 15 tools", async () => {
+  it("registers all 16 tools", async () => {
     const client = await connect(makeCtx());
     const { tools } = await client.listTools();
     const names = tools.map((t) => t.name).sort();
-    expect(names.length).toBe(15);
+    expect(names.length).toBe(16);
     for (const n of [
       "freight_parse_ratecon", "freight_parse_bol_pod", "freight_parse_fuel_receipt",
       "freight_parse_w9", "freight_parse_insurance_cert", "freight_parse_permit",
       "freight_truck_route", "freight_calculate_tolls", "freight_trip_telematics",
       "gov_query", "gov_cms_open_payments", "gov_fbi_crime_data",
       "gov_list_services", "suverse_estimate_cost", "suverse_balance",
+      "suverse_search_endpoints",
     ]) {
       expect(names).toContain(n);
     }
