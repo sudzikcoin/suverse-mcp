@@ -80,6 +80,26 @@ them, paying transparently from your funded Base wallet.
 | `gov_list_services` | Discover the 128 `gov_query` service ids + params |
 | `suverse_estimate_cost` | Price one or many calls before running them |
 | `suverse_balance` | On-chain USDC balance + calls remaining per tool |
+| `suverse_search_endpoints` | Search every x402 endpoint SuVerse knows about (own + CDP Bazaar mirror) |
+
+### Aggregated verdicts (x402, custody-free — the server never pays)
+
+| Tool | Price | Question it answers |
+|---|---|---|
+| `suverse_market_pulse` | $0.10 | What regime is the crypto market in right now? |
+| `suverse_wallet_reputation` | $0.03 | Can this Solana wallet's trading be trusted or copied? |
+| `suverse_token_check` | $0.05 | Is this Solana token sane to enter right now? |
+
+These three work differently from the paid tools above: **this server does not
+pay for them and holds no keys for them.** Called without payment they return a
+structured `payment_required` result — what the endpoint answers, the price, and
+the verbatim x402 challenge (`accepts` on Base, Solana, and Cosmos Noble, all
+USDC). Your agent (or its runtime) decides whether to pay: sign one of the
+accepts with any x402 buyer client (e.g. `@suverselabs/x402-client`) and call
+the tool again with `payment_signature` set to the base64 header value — it is
+forwarded as `PAYMENT-SIGNATURE` / `X-PAYMENT` and the full paid verdict
+(`{verdict, signals, data_quality, raw}`) comes back. Wallet and mint arguments
+are validated as base58 client-side before any network call.
 
 ## Usage examples
 

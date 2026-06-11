@@ -1,6 +1,6 @@
 {
   "name": "@suverselabs/mcp-server",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "MCP server that wraps SuVerse's pay-per-call government + freight APIs as Claude Desktop tools, paying per call in Base USDC via x402.",
   "license": "MIT",
   "repository": {
